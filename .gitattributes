@@ -1,0 +1,3 @@
+* text=auto eol=lf
+third-party/* -whitespace
+LICENSE -whitespace

@@ -1,0 +1,22 @@
+name: Build and verify
+on: [push, pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - name: Verify input routing, settings, and hook bridge
+        run: dotnet run --project tests/CodexProController.Tests -c Release
+      - name: Publish Windows app
+        run: dotnet publish src/CodexProController -c Release -r win-x64 --self-contained true -o publish
+      - name: Publish hook receiver
+        run: dotnet publish src/CodexProController.Hooks -c Release -r win-x64 --self-contained true -o publish
+      - uses: actions/upload-artifact@v4
+        with:
+          name: codex-pro-controller-win-x64
+          path: publish/
