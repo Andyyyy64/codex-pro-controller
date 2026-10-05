@@ -46,6 +46,7 @@ try
     Check(HookBridge.Parse(Hook("SubagentStop"), now) is null, "subagent stop cannot mark parent stopped");
     Check(HookBridge.Parse("{\"session_id\":\"thread_3\",\"hook_event_name\":\"Stop\",\"agent_id\":\"agent_1\"}", now) is null, "subagent tool events ignored");
     Check(HookBridge.Parse("{}", now) is null, "missing hook fields ignored");
+    Check(HookBridge.Parse("\uFEFF" + Hook("Stop"), now)?.State == ChatState.Stopped, "Windows UTF-8 BOM accepted");
     Check(HookBridge.Parse("{\"session_id\":\"thread_3\",\"hook_event_name\":\"SessionStart\",\"source\":\"compact\"}", now)?.State == ChatState.Working, "compaction restart stays working");
     var status = HookBridge.Parse(Hook("PermissionRequest"), now)!;
     HookBridge.Store(directory, status);

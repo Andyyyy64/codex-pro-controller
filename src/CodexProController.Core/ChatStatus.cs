@@ -10,7 +10,8 @@ public static class HookBridge
 {
     public static ChatStatus? Parse(string json, DateTimeOffset now)
     {
-        using var doc = JsonDocument.Parse(json);
+        // Windows PowerShell / .NET Framework may prefix redirected UTF-8 with a BOM.
+        using var doc = JsonDocument.Parse(json.TrimStart('\uFEFF'));
         var root = doc.RootElement;
         if (!root.TryGetProperty("session_id", out var id) || id.ValueKind != JsonValueKind.String ||
             !root.TryGetProperty("hook_event_name", out var name) || name.ValueKind != JsonValueKind.String) return null;
@@ -57,6 +58,7 @@ public static class HookBridge
         var command = $"{ShellQuote(unixExe)} --hook --events {ShellQuote(eventsPath)}";
         // Explicit streams also work with GUI hosts and Windows PowerShell 5.1.
         var windowsScript = $$"""
+            $ProgressPreference = 'SilentlyContinue'
             $json = [Console]::In.ReadToEnd()
             $start = New-Object System.Diagnostics.ProcessStartInfo
             $start.FileName = '{{exePath.Replace("'", "''")}}'
